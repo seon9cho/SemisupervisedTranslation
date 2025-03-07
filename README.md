@@ -1,6 +1,6 @@
 # Semi-supervised Machine Translation
 
-The current machine translation approach has mostly been a supervised task, where a bilingual dataset would be used to train an end-to-end translation system. Although these models have been shown to have fantastic performances, gathering supervised datasets is often hard and very time-consuming. With recent advances in semi/unsupervised methods, this project attempts to explore ways to train a semi-supervised machine translation system by first training language models for two separate languages and aligning them by using a few supervised examples. Although the performance of the model isn't quite perfect, I was able to show that the system can somewhat generalize to far greater data than the amount of data it was trained on.
+The current machine translation approach has mostly been a supervised task, where a bilingual dataset would be used to train an end-to-end translation system. These models have been shown to have fantastic performances, but gathering supervised datasets is often hard and time-consuming. With recent advances in semi/unsupervised methods, this project attempts to explore ways to train a semi-supervised machine translation system by first training language models for two separate languages and aligning them by using a few supervised examples. Although the performance of the model isn't quite perfect, I was able to show that the system can somewhat generalize to far greater data than the amount of data it was trained on.
 
 ## 1. Introduction
 
