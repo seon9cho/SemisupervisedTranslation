@@ -75,7 +75,6 @@ The vector $h$ is then used to generate an image, which is subsequently processe
 ### 4.2 Experimental Design
 Using the Image Encoder Language Model and a training dataset split into two separate monolingual corpora, I first train a language model for each language. A key aspect of this step is ensuring that both models share the same weights for the image encoder and decoder. To achieve this, I begin by training the French language model. Once trained, I use the weights from the French model to initialize the image encoder and decoder for the English model. During the training of the English model, I freeze the weights of the image encoder and decoder. This approach ensures that, despite being trained separately and monolingually, both models share identical weights for image encoding and decoding.
 
-
 After training the two language models, I first map all of the sentences from the 3k data into the representation space. Then, I train a new model in order to align the distribution of the encoded 3k data. I do this in two different ways. I first tried doing this by purely using a linear model. This assumes that the encoded representations of the two languages are purely linear transformations of each other. Letting h_x represent the encodings of the French sentences and h_y represent the encodings of the English sentences, we would be assuming that h_y = A h_x + b for some matrix A and bias vector b. This then becomes a simple optimization problem:
 
 \[ \min_{A, b} \| A h_x + b - h_y \| \]
