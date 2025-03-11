@@ -93,6 +93,88 @@ Although this problem could be approached using ordinary least squares regressio
 
 The second approach involved training a simple three-layer neural network with ReLU activation. The hidden layer of this network was set to have a dimension twice that of the encoded vectors. As we will see in the evaluation section, this approach significantly reduces the training loss but does not lead to substantial improvements in generalization. This outcome is quite intuitive — with a more powerful neural network, the model has the capacity to distort the representation space in a way that closely aligns the supervised examples, without necessarily preserving the structure of the rest of the space.
 
+### 4.3 Unsuccessful Experiments
+
+There were a few other approaches I tried that did not yield the results I had hoped for. I think it is important to discuss these unsuccessful approaches as well, as they provide valuable insights and lessons.
+
+The first approach I attempted was to use two pre-trained language models and align them by performing end-to-end translation using the _3k data_. The idea was as follows: given a French input sentence, it would first be encoded by the French language model. The resulting encoded vector would then serve as input to the English language model, which would generate the corresponding English sentence. The output would then be compared with the actual target sentence, and the model would be trained accordingly. Additionally, I ensured that both language models were periodically fine-tuned so they could still effectively autoencode.
+
+While this approach allowed the models to perform translation on the _3k data_, the generalization performance was extremely poor. When presented with data outside of the training set, the models would frequently default to generating the same output regardless of the input. This indicated that the approach was not successfully aligning the underlying distributions of the two languages but was merely aligning the training examples themselves.
+
+The second approach I explored was to directly train the two language models to produce identical encoding vectors for equivalent sentences in the two languages. Specifically, a French sentence would be encoded by the French language model, and an equivalent English sentence would be encoded by the English language model. I then applied a Mean Squared Error (MSE) loss to minimize the difference between the two encoding vectors, encouraging the models to map equivalent sentences to similar vector representations.
+
+However, this approach quickly led to a degenerate solution where both language models converged to mapping all inputs to a zero vector. In other words, the models learned that the easiest way to minimize the MSE loss was to collapse all representations to a single point in the vector space, effectively erasing any meaningful semantic information. This failure mode highlighted an important lesson: training two models with the same objective simultaneously can lead to undesirable collapse. A more promising approach would be to keep the weights of one model fixed while training the other model to match its output, preventing them from collapsing to trivial solutions.
+
+<table align="center">
+  <thead>
+    <tr>
+      <th width=20></th>
+      <th>Target Sentence</th>
+      <th>Linear Model Output</th>
+      <th>Neural Model Output</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td rowspan=5>3k<br>data</td>
+      <td>Are we just friends?</td>
+      <td>Did you be interested on television?</td>
+      <td>Are we just friends anywhere?</td>
+    </tr>
+    <tr>
+      <td>You should try to write more.</td>
+      <td>You should try to save more quickly than money.</td>
+      <td>You should try to write more mine.</td>
+    </tr>
+    <tr>
+      <td>That’s what I wanted.</td>
+      <td>I know it’s somewhere.</td>
+      <td>That’s what I wanted.</td>
+    </tr>
+    <tr>
+      <td>You should buy yourself a new knife.</td>
+      <td>You should save a safe place to paint.</td>
+      <td>You should buy yourself a new knife.</td>
+    </tr>
+    <tr>
+      <td>You’ve probably heard of us.</td>
+      <td>You’re probably mad at us.</td>
+      <td>You should’ve heard something right past people.</td>
+    </tr>
+    <tr>
+      <td rowspan=5>Test<br>data</td>
+      <td>We’ll never get through this.</td>
+      <td>We should get a truth.</td>
+      <td>We’ll never come back you.</td>
+    </tr>
+    <tr>
+      <td>He is a man of vision.</td>
+      <td>He’s a great writer.</td>
+      <td>He is acting a sweet one.</td>
+    </tr>
+    <tr>
+      <td>I have to go to the men’s room.</td>
+      <td>I cannot get an urgent for you.</td>
+      <td>I will have to get along student.</td>
+    </tr>
+    <tr>
+      <td>Do you have plans for dinner?</td>
+      <td>Do you have any computer to visit us?</td>
+      <td>Do you want to have much snow for the afternoon?</td>
+    </tr>
+    <tr>
+      <td>I don’t want to talk about it further.</td>
+      <td>I don’t want you in any longer.</td>
+      <td>I don’t want to sleep better this afternoon.</td>
+    </tr>
+    <tr>
+      <td colspan=4>Table 1: The translated sentences using the linear model and the neural model compared alongside with the human translation (target sentence). The first 5 lines are sampled from the 3k data, whereas the next 5 lines are sampled from the test data.
+    </tr>
+  </tbody>
+</table>
+
+
+
 ---
 ## References
 
