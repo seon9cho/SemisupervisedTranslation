@@ -75,13 +75,23 @@ The vector $h$ is then used to generate an image, which is subsequently processe
 ### 4.2 Experimental Design
 Using the Image Encoder Language Model and a training dataset split into two separate monolingual corpora, I first train a language model for each language. A key aspect of this step is ensuring that both models share the same weights for the image encoder and decoder. To achieve this, I begin by training the French language model. Once trained, I use the weights from the French model to initialize the image encoder and decoder for the English model. During the training of the English model, I freeze the weights of the image encoder and decoder. This approach ensures that, despite being trained separately and monolingually, both models share identical weights for image encoding and decoding.
 
-After training the two language models, I first map all of the sentences from the 3k data into the representation space. Then, I train a new model in order to align the distribution of the encoded 3k data. I do this in two different ways. I first tried doing this by purely using a linear model. This assumes that the encoded representations of the two languages are purely linear transformations of each other. Letting h_x represent the encodings of the French sentences and h_y represent the encodings of the English sentences, we would be assuming that h_y = A h_x + b for some matrix A and bias vector b. This then becomes a simple optimization problem:
+After training the two language models, I first map all of the sentences from the 3k data into their respective representation spaces. Then, I train a new model to align the distributions of the encoded representations of the 3k data. I approach this alignment problem in two different ways. The first approach involves using a purely linear model, which assumes that the encoded representations of the two languages are related by a linear transformation. Specifically, let $h_f$ denote the representations of the French sentences and $h_e$ denote the representations of the English sentences. We can then assume that
 
-\[ \min_{A, b} \| A h_x + b - h_y \| \]
+```math
+h_e = Ah_f + b
+```
 
-Although this problem could have been approached by doing a least square regression, I decided that it would be easiest to just train a linear model in PyTorch to accomplish the same task.
+for some transformation matrix $A$ and bias vector $b$. The problem then reduces to a simple optimization task, formulated as:
 
-The other approach was done by training a simple 3-layer neural network with ReLU activation. The hidden layer of this network was of dimension 2 times the dimension of the encoded vectors. As we’ll see in the evaluation section, this brings the loss down significantly, but doesn’t quite help that much in terms of generalization. This seems quite intuitive since with a more powerful neural network, the model can potentially transform the data points in such a way that the supervised examples would closely match, with not much regard for how the rest of the space might be changed.
+```math
+\begin{align}
+  \min_{A, b} \| A h_f + b - h_e \|
+\end{align}
+```
+
+Although this problem could be approached using ordinary least squares regression, I opted to train a linear model in PyTorch to achieve the same goal. This provided a straightforward and flexible implementation while allowing for easy integration with the rest of my pipeline.
+
+The second approach involved training a simple three-layer neural network with ReLU activation. The hidden layer of this network was set to have a dimension twice that of the encoded vectors. As we will see in the evaluation section, this approach significantly reduces the training loss but does not lead to substantial improvements in generalization. This outcome is quite intuitive — with a more powerful neural network, the model has the capacity to distort the representation space in a way that closely aligns the supervised examples, without necessarily preserving the structure of the rest of the space.
 
 ---
 ## References
